@@ -1,8 +1,3 @@
-#ifdef GL_ES
-	precision highp int;
-	precision highp float;
-#endif
-
 // some often used snippets:
 //
 //#define EPS    1e-4
@@ -27,15 +22,29 @@
 //}
 //
 
-#define EPS 1e-4
-#define PI  3.141592653589793
+#ifdef GL_ES
+	precision highp int;
+	precision highp float;
+#endif
 
-uniform float time;
 uniform vec2 resolution;
+uniform float time;
 
-void main(void) {
-	vec2 uv = (2.*gl_FragCoord.xy - resolution.xy)/min(resolution.x, resolution.y);
+const int iters = 130;
 
-	vec3 color = vec3(1.);
-	gl_FragColor = vec4(color, 1.);
+void main() {
+	vec2 pos = (2.*gl_FragCoord.xy - resolution.xy)/min(resolution.x, resolution.y);
+	pos.x -= .5;
+
+	vec2 z = vec2(0);
+	int n = 0;
+	while (n < iters) {
+		if(dot(z,z) > 10.) break;
+		z = vec2(z.x*z.x - z.y*z.y + pos.x, 2.*z.x*z.y + pos.y);
+		n++;
+	}
+
+	// smooth coloring from: http://linas.org/art-gallery/escape/smooth.html
+	float c = float(n) + 1. - log(log(length(z)))/0.6931471805599453;
+	gl_FragColor = vec4((-cos(.025*c+time)+1.)/2., (-cos(.08*c+time)+1.)/2., (-cos(.12*c+time)+1.)/2., 1);
 }
