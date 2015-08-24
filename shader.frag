@@ -1,3 +1,5 @@
+#version 330 core
+
 // some often used snippets:
 //
 //#define EPS    1e-4
